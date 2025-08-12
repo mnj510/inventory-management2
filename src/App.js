@@ -1,8 +1,6 @@
 import './App.css';
-import InventoryPage from './InventoryPage';
+import InventoryManagementApp from './InventoryManagementApp';
 
-function App() {
-  return <InventoryPage />;
-}
+function App() { return <InventoryManagementApp />; }
 
 export default App;
