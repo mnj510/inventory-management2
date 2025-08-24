@@ -19,11 +19,6 @@ const AttendanceTab = () => {
       }
     };
     loadAttendanceRecords();
-
-    // 실시간 구독 설정
-    setupRealtimeSubscriptions(() => {
-      loadAttendanceRecords();
-    });
   }, []);
 
   // 시간 옵션 생성 (10분 단위)

@@ -49,7 +49,14 @@ const InventoryTab = () => {
           outgoingRecordsAPI.getAll()
         ]);
         
-        setInventory(inventoryData);
+        // NaN 방지를 위해 데이터 정규화
+        const normalizedInventory = inventoryData.map(item => ({
+          ...item,
+          quantity: item.quantity || 0,
+          grossPackingQuantity: item.grossPackingQuantity || 0
+        }));
+        
+        setInventory(normalizedInventory);
         setInOutRecords(inOutData);
         setPackingRecords(packingData);
         setOutgoingRecords(outgoingData);
@@ -58,11 +65,6 @@ const InventoryTab = () => {
       }
     };
     loadData();
-
-    // 실시간 구독 설정
-    setupRealtimeSubscriptions(() => {
-      loadData();
-    });
   }, []);
 
   // 재고 검색 필터링
@@ -229,12 +231,14 @@ const InventoryTab = () => {
           if (inOutType === '입고') {
             updatedItem = {
               ...currentItem,
-              quantity: currentItem.quantity + selectedProduct.selectedQuantity
+              quantity: currentItem.quantity + selectedProduct.selectedQuantity,
+              grossPackingQuantity: currentItem.grossPackingQuantity || 0
             };
           } else {
             updatedItem = {
               ...currentItem,
-              quantity: Math.max(0, currentItem.quantity - selectedProduct.selectedQuantity)
+              quantity: Math.max(0, currentItem.quantity - selectedProduct.selectedQuantity),
+              grossPackingQuantity: currentItem.grossPackingQuantity || 0
             };
           }
 
@@ -287,9 +291,10 @@ const InventoryTab = () => {
         );
 
         if (packingProduct) {
+          const currentGrossQuantity = packingProduct.grossPackingQuantity || 0;
           const updatedItem = {
             ...packingProduct,
-            grossPackingQuantity: packingProduct.grossPackingQuantity + parseInt(packingData.packingQuantity)
+            grossPackingQuantity: currentGrossQuantity + parseInt(packingData.packingQuantity)
           };
           
           // 재고 업데이트
@@ -335,9 +340,10 @@ const InventoryTab = () => {
     }
 
     try {
+      const currentGrossQuantity = selectedOutgoingProduct.grossPackingQuantity || 0;
       const updatedItem = {
         ...selectedOutgoingProduct,
-        grossPackingQuantity: selectedOutgoingProduct.grossPackingQuantity - parseInt(outgoingData.outgoingQuantity)
+        grossPackingQuantity: Math.max(0, currentGrossQuantity - parseInt(outgoingData.outgoingQuantity))
       };
 
       // 재고 업데이트
@@ -537,9 +543,9 @@ const InventoryTab = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-bold text-lg">{item.name}</h3>
-                      <p className="text-gray-600">재고 수량: {item.quantity}개</p>
-                      <p className="text-gray-600">그로스 포장 수량: {item.grossPackingQuantity}개</p>
-                      <p className="text-sm text-gray-500">바코드: {item.barcode}</p>
+                                        <p className="text-gray-600">재고 수량: {item.quantity || 0}개</p>
+                  <p className="text-gray-600">그로스 포장 수량: {item.grossPackingQuantity || 0}개</p>
+                  <p className="text-sm text-gray-500">바코드: {item.barcode}</p>
                     </div>
                     <div className="flex gap-2">
                       <button

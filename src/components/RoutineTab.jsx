@@ -20,11 +20,6 @@ const RoutineTab = () => {
       }
     };
     loadRoutines();
-
-    // 실시간 구독 설정
-    setupRealtimeSubscriptions(() => {
-      loadRoutines();
-    });
   }, []);
 
   // 관리자 로그인
