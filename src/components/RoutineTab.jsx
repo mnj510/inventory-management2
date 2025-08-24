@@ -24,7 +24,7 @@ const RoutineTab = () => {
 
   // 관리자 로그인
   const handleAdminLogin = () => {
-    if (adminPassword === 'admin123') {
+    if (adminPassword === '0455') {
       setIsAdmin(true);
       setAdminPassword('');
       alert('관리자 모드로 진입했습니다.');
@@ -105,7 +105,7 @@ const RoutineTab = () => {
               type="password"
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
-              placeholder="관리자 비밀번호를 입력하세요"
+              placeholder="관리자 비밀번호 입력"
               className="flex-1 p-2 border border-gray-300 rounded-lg"
               onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
             />
@@ -116,7 +116,6 @@ const RoutineTab = () => {
               로그인
             </button>
           </div>
-          <p className="text-sm text-gray-500 mt-2">힌트: admin123</p>
         </div>
       )}
 
