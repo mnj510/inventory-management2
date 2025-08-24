@@ -1,6 +1,8 @@
 import './App.css';
-import InventoryManagementApp from './InventoryManagementApp';
+import LogisticsSystem from './LogisticsSystem';
 
-function App() { return <InventoryManagementApp />; }
+function App() {
+  return <LogisticsSystem />;
+}
 
 export default App;

@@ -1,0 +1,151 @@
+const API_BASE_URL = 'http://192.168.219.43:5001/api';
+
+// 출퇴근 기록 API
+export const attendanceAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/attendance`);
+    return response.json();
+  },
+  
+  create: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/attendance`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  }
+};
+
+// 재고 API
+export const inventoryAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/inventory`);
+    return response.json();
+  },
+  
+  create: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/inventory`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  update: async (id, data) => {
+    const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  delete: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  }
+};
+
+// 입출고 기록 API
+export const inoutRecordsAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/inout-records`);
+    return response.json();
+  },
+  
+  create: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/inout-records`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  }
+};
+
+// 포장 기록 API
+export const packingRecordsAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/packing-records`);
+    return response.json();
+  },
+  
+  create: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/packing-records`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  }
+};
+
+// 출고 기록 API
+export const outgoingRecordsAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/outgoing-records`);
+    return response.json();
+  },
+  
+  create: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/outgoing-records`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  }
+};
+
+// 업무 루틴 API
+export const routinesAPI = {
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/routines`);
+    return response.json();
+  },
+  
+  create: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/routines`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  update: async (id, data) => {
+    const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+  
+  delete: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  }
+};

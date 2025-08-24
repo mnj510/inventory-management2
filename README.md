@@ -1,70 +1,135 @@
-# Getting Started with Create React App
+# 물류 직원 관리 시스템
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+여러 사용자가 동일한 데이터를 공유하고 수정할 수 있는 물류 관리 웹사이트입니다.
 
-## Available Scripts
+## 주요 기능
 
-In the project directory, you can run:
+### 📊 출퇴근 관리
+- 출근/퇴근 시간 기록
+- 10분 단위 시간 선택
+- 실시간 기록 목록 표시
 
-### `npm start`
+### 📦 재고 관리
+- **재고 리스트**: 상품 추가/수정/삭제, 검색 기능
+- **입출고**: 바코드 스캔, 제품 선택, 수량 조정, 입출고 처리
+- **그로스 포장**: 포장 기록, 출고 관리
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### ✅ 업무 루틴
+- 체크리스트 형태의 업무 관리
+- 관리자 모드 (비밀번호: admin123)
+- 업무 추가/수정/삭제 기능
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🎨 사용자 인터페이스
+- 접을 수 있는 사이드바 네비게이션
+- 반응형 디자인
+- 직관적인 UI/UX
 
-### `npm test`
+## 기술 스택
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Frontend
+- React 18.2.0
+- Tailwind CSS
+- Lucide React (아이콘)
+- Fetch API
 
-### `npm run build`
+### Backend
+- Node.js
+- Express.js
+- SQLite3
+- CORS
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 설치 및 실행
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. 저장소 클론
+```bash
+git clone <repository-url>
+cd fogni-dashboard
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 2. 백엔드 서버 설치 및 실행
+```bash
+cd server
+npm install
+npm start
+```
 
-### `npm run eject`
+백엔드 서버는 `http://localhost:5000`에서 실행됩니다.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 3. 프론트엔드 설치 및 실행
+```bash
+# 루트 디렉토리로 이동
+cd ..
+npm install
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+프론트엔드는 `http://localhost:3000`에서 실행됩니다.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 데이터베이스
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+SQLite 데이터베이스가 자동으로 생성되며, 다음 테이블들이 포함됩니다:
 
-## Learn More
+- `attendance_records`: 출퇴근 기록
+- `inventory`: 재고 정보
+- `inout_records`: 입출고 기록
+- `packing_records`: 포장 기록
+- `outgoing_records`: 출고 기록
+- `routines`: 업무 루틴
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+초기 데이터가 자동으로 삽입됩니다.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## API 엔드포인트
 
-### Code Splitting
+### 출퇴근 기록
+- `GET /api/attendance`: 모든 출퇴근 기록 조회
+- `POST /api/attendance`: 새로운 출퇴근 기록 생성
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 재고 관리
+- `GET /api/inventory`: 모든 재고 조회
+- `POST /api/inventory`: 새로운 재고 추가
+- `PUT /api/inventory/:id`: 재고 수정
+- `DELETE /api/inventory/:id`: 재고 삭제
 
-### Analyzing the Bundle Size
+### 입출고 기록
+- `GET /api/inout-records`: 모든 입출고 기록 조회
+- `POST /api/inout-records`: 새로운 입출고 기록 생성
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 포장 기록
+- `GET /api/packing-records`: 모든 포장 기록 조회
+- `POST /api/packing-records`: 새로운 포장 기록 생성
 
-### Making a Progressive Web App
+### 출고 기록
+- `GET /api/outgoing-records`: 모든 출고 기록 조회
+- `POST /api/outgoing-records`: 새로운 출고 기록 생성
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 업무 루틴
+- `GET /api/routines`: 모든 업무 루틴 조회
+- `POST /api/routines`: 새로운 업무 추가
+- `PUT /api/routines/:id`: 업무 수정
+- `DELETE /api/routines/:id`: 업무 삭제
 
-### Advanced Configuration
+## 배포
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### 로컬 배포
+1. 백엔드와 프론트엔드를 모두 실행
+2. 브라우저에서 `http://localhost:3000` 접속
 
-### Deployment
+### 네트워크 배포 (다른 기기에서 접속 가능)
+1. 배포 스크립트 실행: `./start.sh`
+2. 다른 기기에서 `http://192.168.219.43:3000` 접속
+3. 모든 기기에서 동일한 데이터 공유
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### 프로덕션 배포
+1. 프론트엔드 빌드: `npm run build`
+2. 백엔드 서버를 프로덕션 환경에 배포
+3. 환경 변수 설정 (필요시)
 
-### `npm run build` fails to minify
+## 관리자 모드
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+업무 루틴 탭에서 관리자 모드에 접근할 수 있습니다:
+- 비밀번호: `admin123`
+- 관리자 모드에서 업무 추가/수정/삭제 가능
+
+## 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다.
