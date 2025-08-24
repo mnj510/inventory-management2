@@ -340,26 +340,26 @@ const AttendanceTab = () => {
                       <option value="출근">출근</option>
                       <option value="퇴근">퇴근</option>
                     </select>
-                    <select
-                      value={editingRecord.time.split(':')[0]}
-                      onChange={(e) => {
-                        const [_, minute] = editingRecord.time.split(':');
-                        setEditingRecord({...editingRecord, time: `${e.target.value}:${minute}`});
-                      }}
-                      className="p-1 border border-gray-300 rounded text-sm"
-                    >
+                                         <select
+                       value={editingRecord.time.split(':')[0]}
+                       onChange={(e) => {
+                         const [, minute] = editingRecord.time.split(':');
+                         setEditingRecord({...editingRecord, time: `${e.target.value}:${minute}`});
+                       }}
+                       className="p-1 border border-gray-300 rounded text-sm"
+                     >
                       {hours.map(hour => (
                         <option key={hour} value={hour}>{hour}시</option>
                       ))}
                     </select>
-                    <select
-                      value={editingRecord.time.split(':')[1]}
-                      onChange={(e) => {
-                        const [hour, _] = editingRecord.time.split(':');
-                        setEditingRecord({...editingRecord, time: `${hour}:${e.target.value}`});
-                      }}
-                      className="p-1 border border-gray-300 rounded text-sm"
-                    >
+                                         <select
+                       value={editingRecord.time.split(':')[1]}
+                       onChange={(e) => {
+                         const [hour] = editingRecord.time.split(':');
+                         setEditingRecord({...editingRecord, time: `${hour}:${e.target.value}`});
+                       }}
+                       className="p-1 border border-gray-300 rounded text-sm"
+                     >
                       {minutes.map(minute => (
                         <option key={minute} value={minute}>{minute}분</option>
                       ))}
