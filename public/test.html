@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배포 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            margin-bottom: 1rem;
+        }
+        .status {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .success { background: rgba(76, 175, 80, 0.3); }
+        .error { background: rgba(244, 67, 54, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Vercel 배포 테스트</h1>
+        <p>이 페이지가 보인다면 정적 파일 서빙은 정상입니다.</p>
+        
+        <div class="status success">
+            ✅ 정적 파일 서빙: 정상
+        </div>
+        
+        <div id="api-status" class="status">
+            🔄 API 연결 테스트 중...
+        </div>
+        
+        <div id="app-status" class="status">
+            🔄 React 앱 로드 테스트 중...
+        </div>
+    </div>
+
+    <script>
+        // API 연결 테스트
+        fetch('/api/attendance')
+            .then(response => {
+                const statusDiv = document.getElementById('api-status');
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '✅ API 연결: 정상';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ API 연결: 실패 (' + response.status + ')';
+                }
+            })
+            .catch(error => {
+                const statusDiv = document.getElementById('api-status');
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ API 연결: 오류 (' + error.message + ')';
+            });
+
+        // React 앱 로드 테스트
+        fetch('/')
+            .then(response => {
+                const statusDiv = document.getElementById('app-status');
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '✅ React 앱: 로드 가능';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ React 앱: 로드 실패 (' + response.status + ')';
+                }
+            })
+            .catch(error => {
+                const statusDiv = document.getElementById('app-status');
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ React 앱: 오류 (' + error.message + ')';
+            });
+    </script>
+</body>
+</html>

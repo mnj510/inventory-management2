@@ -1,5 +1,23 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
+// API 연결 상태 확인
+const checkApiConnection = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/attendance`);
+    return response.ok;
+  } catch (error) {
+    console.error('API 연결 확인 실패:', error);
+    return false;
+  }
+};
+
+// 전역 API 상태
+let apiConnected = false;
+checkApiConnection().then(connected => {
+  apiConnected = connected;
+  console.log('API 연결 상태:', connected);
+});
+
 // 출퇴근 기록 API
 export const attendanceAPI = {
   getAll: async () => {
