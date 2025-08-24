@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://192.168.219.43:5001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 // 출퇴근 기록 API
 export const attendanceAPI = {
