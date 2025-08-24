@@ -11,10 +11,8 @@ const checkApiConnection = async () => {
   }
 };
 
-// 전역 API 상태
-let apiConnected = false;
+// 전역 API 상태 확인
 checkApiConnection().then(connected => {
-  apiConnected = connected;
   console.log('API 연결 상태:', connected);
 });
 
