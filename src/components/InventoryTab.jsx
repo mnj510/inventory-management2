@@ -764,7 +764,7 @@ const InventoryTab = () => {
                 {inOutRecords.map(record => (
                   <div key={record.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                     <div>
-                      <span className="font-medium">{record.productName}</span>
+                      <span className="font-medium">{record.product_name || record.productName}</span>
                       <span className={`ml-2 px-2 py-1 text-xs rounded ${
                         record.type === '입고' 
                         ? 'bg-green-100 text-green-700' 
@@ -773,6 +773,7 @@ const InventoryTab = () => {
                         {record.type}
                       </span>
                       <span className="ml-2 text-gray-600">수량: {record.quantity}개</span>
+                      <div className="text-sm text-gray-500 mt-1">바코드: {record.barcode}</div>
                     </div>
                     <span className="text-sm text-gray-600">{record.date} {record.time}</span>
                   </div>

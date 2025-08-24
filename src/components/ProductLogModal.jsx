@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Filter } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 
 const ProductLogModal = ({ isOpen, onClose, product, inoutRecords }) => {
   const [selectedMonth, setSelectedMonth] = useState('');
@@ -26,7 +26,8 @@ const ProductLogModal = ({ isOpen, onClose, product, inoutRecords }) => {
   useEffect(() => {
     if (selectedYear && selectedMonth && inoutRecords) {
       const filtered = inoutRecords.filter(record => {
-        if (record.productName !== product?.name) return false;
+        const recordProductName = record.product_name || record.productName;
+        if (recordProductName !== product?.name) return false;
         
         const recordDate = new Date(record.date);
         const recordYear = recordDate.getFullYear();
@@ -113,17 +114,18 @@ const ProductLogModal = ({ isOpen, onClose, product, inoutRecords }) => {
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-1 text-xs rounded font-medium ${
-                          record.type === '입고' 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-red-100 text-red-700'
-                        }`}>
-                          {record.type}
-                        </span>
-                        <span className="font-medium">{record.quantity}개</span>
-                      </div>
-                      <p className="text-sm text-gray-600">바코드: {record.barcode}</p>
+                                             <div className="flex items-center gap-2 mb-2">
+                         <span className={`px-2 py-1 text-xs rounded font-medium ${
+                           record.type === '입고' 
+                             ? 'bg-green-100 text-green-700' 
+                             : 'bg-red-100 text-red-700'
+                         }`}>
+                           {record.type}
+                         </span>
+                         <span className="font-medium">{record.quantity}개</span>
+                       </div>
+                       <p className="text-sm text-gray-600">상품명: {record.product_name || record.productName}</p>
+                       <p className="text-sm text-gray-600">바코드: {record.barcode}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">{record.date}</p>
