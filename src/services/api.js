@@ -16,6 +16,24 @@ export const attendanceAPI = {
       body: JSON.stringify(data),
     });
     return response.json();
+  },
+
+  update: async (id, data) => {
+    const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  delete: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+      method: 'DELETE',
+    });
+    return response.json();
   }
 };
 

@@ -11,6 +11,10 @@ const AttendanceTab = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [monthlyStats, setMonthlyStats] = useState({ totalDays: 0, totalHours: 0, totalMinutes: 0 });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
 
   // 데이터 로드
   useEffect(() => {
@@ -105,6 +109,55 @@ const AttendanceTab = () => {
     }
   }, [attendanceRecords, selectedYear, selectedMonth]);
 
+  // 관리자 로그인
+  const handleAdminLogin = () => {
+    if (adminPassword === '0455') {
+      setIsAdmin(true);
+      setAdminPassword('');
+      setShowAdminLogin(false);
+      alert('관리자 모드로 진입했습니다.');
+    } else {
+      alert('비밀번호가 틀렸습니다.');
+    }
+  };
+
+  // 관리자 로그아웃
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    setEditingRecord(null);
+    alert('관리자 모드에서 나갔습니다.');
+  };
+
+  // 기록 수정
+  const updateAttendanceRecord = async (id, updatedData) => {
+    try {
+      await attendanceAPI.update(id, updatedData);
+      const updatedRecords = attendanceRecords.map(record => 
+        record.id === id ? { ...record, ...updatedData } : record
+      );
+      setAttendanceRecords(updatedRecords);
+      setEditingRecord(null);
+      alert('기록이 수정되었습니다.');
+    } catch (error) {
+      console.error('기록 수정 오류:', error);
+      alert('기록 수정 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 기록 삭제
+  const deleteAttendanceRecord = async (id) => {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      try {
+        await attendanceAPI.delete(id);
+        setAttendanceRecords(attendanceRecords.filter(record => record.id !== id));
+        alert('기록이 삭제되었습니다.');
+      } catch (error) {
+        console.error('기록 삭제 오류:', error);
+        alert('기록 삭제 중 오류가 발생했습니다.');
+      }
+    }
+  };
+
   // 출퇴근 기록 추가
   const addAttendanceRecord = async () => {
     try {
@@ -185,10 +238,32 @@ const AttendanceTab = () => {
 
       {/* 월별 필터 */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-          <Calendar className="w-5 h-5" />
-          월별 출퇴근 기록
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold flex items-center gap-2">
+            <Calendar className="w-5 h-5" />
+            월별 출퇴근 기록
+          </h3>
+          <div className="flex items-center gap-2">
+            {!isAdmin ? (
+              <button
+                onClick={() => setShowAdminLogin(true)}
+                className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+              >
+                관리자 로그인
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-red-600 font-medium">관리자 모드</span>
+                <button
+                  onClick={handleAdminLogout}
+                  className="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700"
+                >
+                  로그아웃
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         <div className="flex gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">년도</label>
@@ -252,19 +327,141 @@ const AttendanceTab = () => {
           ) : (
             filteredRecords.map(record => (
               <div key={record.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                <span className={`font-medium px-2 py-1 rounded text-sm ${
-                  record.type === '출근' 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-red-100 text-red-700'
-                }`}>
-                  {record.type}
-                </span>
-                <span className="text-gray-600">{record.date} {record.time}</span>
+                {editingRecord?.id === record.id ? (
+                  <div className="flex-1 flex items-center gap-2">
+                    <select
+                      value={editingRecord.type}
+                      onChange={(e) => setEditingRecord({...editingRecord, type: e.target.value})}
+                      className="p-1 border border-gray-300 rounded text-sm"
+                    >
+                      <option value="출근">출근</option>
+                      <option value="퇴근">퇴근</option>
+                    </select>
+                    <select
+                      value={editingRecord.time.split(':')[0]}
+                      onChange={(e) => {
+                        const [_, minute] = editingRecord.time.split(':');
+                        setEditingRecord({...editingRecord, time: `${e.target.value}:${minute}`});
+                      }}
+                      className="p-1 border border-gray-300 rounded text-sm"
+                    >
+                      {hours.map(hour => (
+                        <option key={hour} value={hour}>{hour}시</option>
+                      ))}
+                    </select>
+                    <select
+                      value={editingRecord.time.split(':')[1]}
+                      onChange={(e) => {
+                        const [hour, _] = editingRecord.time.split(':');
+                        setEditingRecord({...editingRecord, time: `${hour}:${e.target.value}`});
+                      }}
+                      className="p-1 border border-gray-300 rounded text-sm"
+                    >
+                      {minutes.map(minute => (
+                        <option key={minute} value={minute}>{minute}분</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => updateAttendanceRecord(record.id, editingRecord)}
+                      className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700"
+                    >
+                      저장
+                    </button>
+                    <button
+                      onClick={() => setEditingRecord(null)}
+                      className="bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600"
+                    >
+                      취소
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <span className={`font-medium px-2 py-1 rounded text-sm ${
+                      record.type === '출근' 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {record.type}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600">{record.date} {record.time}</span>
+                      {isAdmin && (
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => setEditingRecord(record)}
+                            className="text-blue-600 hover:text-blue-800 text-xs"
+                            title="수정"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => deleteAttendanceRecord(record.id)}
+                            className="text-red-600 hover:text-red-800 text-xs"
+                            title="삭제"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             ))
           )}
         </div>
       </div>
+
+      {/* 관리자 로그인 모달 */}
+      {showAdminLogin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-96">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">관리자 로그인</h3>
+              <button
+                onClick={() => {
+                  setShowAdminLogin(false);
+                  setAdminPassword('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="관리자 비밀번호 입력"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAdminLogin}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                >
+                  로그인
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAdminLogin(false);
+                    setAdminPassword('');
+                  }}
+                  className="flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

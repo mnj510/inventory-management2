@@ -145,6 +145,30 @@ app.post('/api/attendance', (req, res) => {
   });
 });
 
+app.put('/api/attendance/:id', (req, res) => {
+  const { type, time, date } = req.body;
+  const { id } = req.params;
+  db.run('UPDATE attendance_records SET type = ?, time = ?, date = ? WHERE id = ?', 
+    [type, time, date, id], function(err) {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json({ id, type, time, date });
+  });
+});
+
+app.delete('/api/attendance/:id', (req, res) => {
+  const { id } = req.params;
+  db.run('DELETE FROM attendance_records WHERE id = ?', [id], function(err) {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json({ message: '기록이 삭제되었습니다.' });
+  });
+});
+
 // 재고 API
 app.get('/api/inventory', (req, res) => {
   db.all('SELECT * FROM inventory ORDER BY id', (err, rows) => {
