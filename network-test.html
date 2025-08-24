@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물류 시스템 네트워크 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .link {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .link:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 물류 관리 시스템 네트워크 테스트</h1>
+        
+        <div class="status info">
+            <h3>📱 접속 정보</h3>
+            <p><strong>로컬 접속:</strong> <a href="http://localhost:3000" class="link">http://localhost:3000</a></p>
+            <p><strong>네트워크 접속:</strong> <a href="http://192.168.219.43:3000" class="link">http://192.168.219.43:3000</a></p>
+        </div>
+
+        <div class="status info">
+            <h3>🔧 백엔드 API 상태</h3>
+            <p><strong>API 서버:</strong> <a href="http://192.168.219.43:5000/api/inventory" class="link">테스트</a></p>
+        </div>
+
+        <div class="status info">
+            <h3>💡 사용 방법</h3>
+            <ol>
+                <li>같은 Wi-Fi 네트워크에 연결된 다른 기기에서 접속</li>
+                <li>브라우저에서 <code>http://192.168.219.43:3000</code> 입력</li>
+                <li>모든 기기에서 동일한 데이터 확인 및 수정 가능</li>
+            </ol>
+        </div>
+
+        <div class="status success">
+            <h3>✅ 시스템 상태</h3>
+            <p>모든 사용자가 동일한 데이터를 공유할 수 있습니다!</p>
+            <p>데이터는 SQLite 데이터베이스에 영구 저장됩니다.</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="http://192.168.219.43:3000" class="link" style="font-size: 18px; padding: 15px 30px;">
+                🚀 물류 시스템 시작하기
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // API 연결 테스트
+        fetch('http://192.168.219.43:5000/api/inventory')
+            .then(response => response.json())
+            .then(data => {
+                console.log('API 연결 성공:', data);
+            })
+            .catch(error => {
+                console.error('API 연결 실패:', error);
+            });
+    </script>
+</body>
+</html>
