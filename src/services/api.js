@@ -19,21 +19,37 @@ export const attendanceAPI = {
   },
 
   update: async (id, data) => {
-    const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('출퇴근 기록 수정 오류:', error);
+      throw error;
+    }
   },
 
   delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
-      method: 'DELETE',
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('출퇴근 기록 삭제 오류:', error);
+      throw error;
+    }
   }
 };
 

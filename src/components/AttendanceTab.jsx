@@ -131,7 +131,10 @@ const AttendanceTab = () => {
   // 기록 수정
   const updateAttendanceRecord = async (id, updatedData) => {
     try {
-      await attendanceAPI.update(id, updatedData);
+      console.log('수정할 데이터:', { id, updatedData });
+      const result = await attendanceAPI.update(id, updatedData);
+      console.log('서버 응답:', result);
+      
       const updatedRecords = attendanceRecords.map(record => 
         record.id === id ? { ...record, ...updatedData } : record
       );
@@ -140,7 +143,7 @@ const AttendanceTab = () => {
       alert('기록이 수정되었습니다.');
     } catch (error) {
       console.error('기록 수정 오류:', error);
-      alert('기록 수정 중 오류가 발생했습니다.');
+      alert(`기록 수정 중 오류가 발생했습니다: ${error.message}`);
     }
   };
 
@@ -362,7 +365,15 @@ const AttendanceTab = () => {
                       ))}
                     </select>
                     <button
-                      onClick={() => updateAttendanceRecord(record.id, editingRecord)}
+                      onClick={() => {
+                        const dataToUpdate = {
+                          type: editingRecord.type,
+                          time: editingRecord.time,
+                          date: editingRecord.date
+                        };
+                        console.log('전송할 데이터:', dataToUpdate);
+                        updateAttendanceRecord(record.id, dataToUpdate);
+                      }}
                       className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700"
                     >
                       저장
