@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Edit3, Trash2, Scan, Minus } from 'lucide-react';
-import { inventoryAPI, inoutRecordsAPI, packingRecordsAPI, outgoingRecordsAPI } from '../services/api';
+import { inventoryAPI, inoutRecordsAPI, packingRecordsAPI, outgoingRecordsAPI } from '../services/supabase-api';
+import { setupRealtimeSubscriptions } from '../services/supabase-api';
 
 const InventoryTab = () => {
   const [activeInventoryTab, setActiveInventoryTab] = useState('list');
@@ -58,6 +59,11 @@ const InventoryTab = () => {
       }
     };
     loadData();
+
+    // 실시간 구독 설정
+    setupRealtimeSubscriptions(() => {
+      loadData();
+    });
   }, []);
 
   // 재고 검색 필터링

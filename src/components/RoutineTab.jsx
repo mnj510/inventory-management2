@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckSquare, Lock, Edit3, Trash2, Plus } from 'lucide-react';
-import { routinesAPI } from '../services/api';
+import { routinesAPI } from '../services/supabase-api';
+import { setupRealtimeSubscriptions } from '../services/supabase-api';
 
 const RoutineTab = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -20,6 +21,11 @@ const RoutineTab = () => {
       }
     };
     loadRoutines();
+
+    // 실시간 구독 설정
+    setupRealtimeSubscriptions(() => {
+      loadRoutines();
+    });
   }, []);
 
   // 관리자 로그인

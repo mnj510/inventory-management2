@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Plus } from 'lucide-react';
-import { attendanceAPI } from '../services/api';
+import { attendanceAPI } from '../services/supabase-api';
+import { setupRealtimeSubscriptions } from '../services/supabase-api';
 
 const AttendanceTab = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -19,6 +20,11 @@ const AttendanceTab = () => {
       }
     };
     loadAttendanceRecords();
+
+    // 실시간 구독 설정
+    setupRealtimeSubscriptions(() => {
+      loadAttendanceRecords();
+    });
   }, []);
 
   // 시간 옵션 생성 (10분 단위)
