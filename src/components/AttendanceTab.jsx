@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Plus, Calendar, BarChart3 } from 'lucide-react';
+import { Clock, Plus, Calendar, BarChart3, X } from 'lucide-react';
 import { attendanceAPI } from '../services/api';
 
 const AttendanceTab = () => {
