@@ -2,6 +2,7 @@
   "name": "fogni-dashboard",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://mnj510.github.io/inventory-management2",
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",
     "@testing-library/jest-dom": "^5.16.4",
@@ -19,7 +20,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "vercel-build": "npm run build"
+    "vercel-build": "npm run build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -43,6 +46,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
     "autoprefixer": "^10.4.19",
     "css-loader": "^6.11.0",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.4.49",
     "source-map-loader": "^5.0.0",
     "style-loader": "^3.3.4",
