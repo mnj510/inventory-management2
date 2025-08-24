@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Edit3, Trash2, Scan, Minus } from 'lucide-react';
-import { inventoryAPI, inoutRecordsAPI, packingRecordsAPI, outgoingRecordsAPI } from '../services/supabase-api';
-import { setupRealtimeSubscriptions } from '../services/supabase-api';
+import { inventoryAPI, inoutRecordsAPI, packingRecordsAPI, outgoingRecordsAPI } from '../services/api';
 
 const InventoryTab = () => {
   const [activeInventoryTab, setActiveInventoryTab] = useState('list');
@@ -226,33 +225,45 @@ const InventoryTab = () => {
         if (inventoryIndex !== -1) {
           const currentItem = updatedInventory[inventoryIndex];
           
+          let updatedItem;
           if (inOutType === '입고') {
-            updatedInventory[inventoryIndex] = {
+            updatedItem = {
               ...currentItem,
               quantity: currentItem.quantity + selectedProduct.selectedQuantity
             };
           } else {
-            updatedInventory[inventoryIndex] = {
+            updatedItem = {
               ...currentItem,
               quantity: Math.max(0, currentItem.quantity - selectedProduct.selectedQuantity)
             };
           }
 
           // 재고 업데이트
-          await inventoryAPI.update(selectedProduct.id, updatedInventory[inventoryIndex]);
+          try {
+            await inventoryAPI.update(selectedProduct.id, updatedItem);
+            updatedInventory[inventoryIndex] = updatedItem;
+          } catch (updateError) {
+            console.error('재고 업데이트 오류:', updateError);
+            throw new Error('재고 업데이트 실패');
+          }
 
           // 입출고 기록 생성
-          const recordData = {
-            productName: selectedProduct.name,
-            barcode: selectedProduct.barcode,
-            type: inOutType,
-            quantity: selectedProduct.selectedQuantity,
-            date: new Date().toLocaleDateString('ko-KR'),
-            time: new Date().toLocaleTimeString('ko-KR')
-          };
-          
-          const newRecord = await inoutRecordsAPI.create(recordData);
-          newRecords.push(newRecord);
+          try {
+            const recordData = {
+              productName: selectedProduct.name,
+              barcode: selectedProduct.barcode,
+              type: inOutType,
+              quantity: selectedProduct.selectedQuantity,
+              date: new Date().toLocaleDateString('ko-KR'),
+              time: new Date().toLocaleTimeString('ko-KR')
+            };
+            
+            const newRecord = await inoutRecordsAPI.create(recordData);
+            newRecords.push(newRecord);
+          } catch (recordError) {
+            console.error('기록 생성 오류:', recordError);
+            throw new Error('입출고 기록 생성 실패');
+          }
         }
       }
 
@@ -263,7 +274,7 @@ const InventoryTab = () => {
       alert(`${selectedProducts.length}개 제품의 ${inOutType} 처리가 완료되었습니다.`);
     } catch (error) {
       console.error('입출고 처리 오류:', error);
-      alert('입출고 처리 중 오류가 발생했습니다.');
+      alert(`입출고 처리 중 오류가 발생했습니다: ${error.message}`);
     }
   };
 
@@ -276,19 +287,16 @@ const InventoryTab = () => {
         );
 
         if (packingProduct) {
-          const updatedInventory = inventory.map(item => {
-            if (item.id === packingProduct.id) {
-              return { 
-                ...item, 
-                grossPackingQuantity: item.grossPackingQuantity + parseInt(packingData.packingQuantity)
-              };
-            }
-            return item;
-          });
+          const updatedItem = {
+            ...packingProduct,
+            grossPackingQuantity: packingProduct.grossPackingQuantity + parseInt(packingData.packingQuantity)
+          };
           
           // 재고 업데이트
-          await inventoryAPI.update(packingProduct.id, updatedInventory.find(item => item.id === packingProduct.id));
-          setInventory(updatedInventory);
+          await inventoryAPI.update(packingProduct.id, updatedItem);
+          setInventory(inventory.map(item => 
+            item.id === packingProduct.id ? updatedItem : item
+          ));
         }
 
         const recordData = {
@@ -327,19 +335,16 @@ const InventoryTab = () => {
     }
 
     try {
-      const updatedInventory = inventory.map(item => {
-        if (item.id === selectedOutgoingProduct.id) {
-          return {
-            ...item,
-            grossPackingQuantity: item.grossPackingQuantity - parseInt(outgoingData.outgoingQuantity)
-          };
-        }
-        return item;
-      });
+      const updatedItem = {
+        ...selectedOutgoingProduct,
+        grossPackingQuantity: selectedOutgoingProduct.grossPackingQuantity - parseInt(outgoingData.outgoingQuantity)
+      };
 
       // 재고 업데이트
-      await inventoryAPI.update(selectedOutgoingProduct.id, updatedInventory.find(item => item.id === selectedOutgoingProduct.id));
-      setInventory(updatedInventory);
+      await inventoryAPI.update(selectedOutgoingProduct.id, updatedItem);
+      setInventory(inventory.map(item => 
+        item.id === selectedOutgoingProduct.id ? updatedItem : item
+      ));
 
       const recordData = {
         productName: selectedOutgoingProduct.name,

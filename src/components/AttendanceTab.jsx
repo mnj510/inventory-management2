@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Plus } from 'lucide-react';
-import { attendanceAPI } from '../services/supabase-api';
-import { setupRealtimeSubscriptions } from '../services/supabase-api';
+import { attendanceAPI } from '../services/api';
 
 const AttendanceTab = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckSquare, Lock, Edit3, Trash2, Plus } from 'lucide-react';
-import { routinesAPI } from '../services/supabase-api';
-import { setupRealtimeSubscriptions } from '../services/supabase-api';
+import { routinesAPI } from '../services/api';
 
 const RoutineTab = () => {
   const [isAdmin, setIsAdmin] = useState(false);

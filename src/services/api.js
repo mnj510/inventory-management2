@@ -22,37 +22,69 @@ export const attendanceAPI = {
 // 재고 API
 export const inventoryAPI = {
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/inventory`);
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('재고 조회 오류:', error);
+      throw error;
+    }
   },
   
   create: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/inventory`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('재고 생성 오류:', error);
+      throw error;
+    }
   },
   
   update: async (id, data) => {
-    const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('재고 업데이트 오류:', error);
+      throw error;
+    }
   },
   
   delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
-      method: 'DELETE',
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('재고 삭제 오류:', error);
+      throw error;
+    }
   }
 };
 
