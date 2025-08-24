@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Edit3, Trash2, Scan, Minus } from 'lucide-react';
+import { Package, Plus, Search, Edit3, Trash2, Scan, Minus, History } from 'lucide-react';
 import { inventoryAPI, inoutRecordsAPI, packingRecordsAPI, outgoingRecordsAPI } from '../services/api';
+import ProductLogModal from './ProductLogModal';
 
 const InventoryTab = () => {
   const [activeInventoryTab, setActiveInventoryTab] = useState('list');
@@ -37,6 +38,8 @@ const InventoryTab = () => {
   });
   const [outgoingFilteredProducts, setOutgoingFilteredProducts] = useState([]);
   const [selectedOutgoingProduct, setSelectedOutgoingProduct] = useState(null);
+  const [selectedProductForLog, setSelectedProductForLog] = useState(null);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
 
   // 데이터 로드
   useEffect(() => {
@@ -576,6 +579,16 @@ const InventoryTab = () => {
                     </div>
                     <div className="flex gap-2">
                       <button
+                        onClick={() => {
+                          setSelectedProductForLog(item);
+                          setIsLogModalOpen(true);
+                        }}
+                        className="text-green-600 hover:text-green-800"
+                        title="입출고 로그 보기"
+                      >
+                        <History className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => setEditingItem(item)}
                         className="text-blue-600 hover:text-blue-800"
                       >
@@ -997,6 +1010,17 @@ const InventoryTab = () => {
           )}
         </div>
       )}
+
+      {/* 제품 로그 모달 */}
+      <ProductLogModal
+        isOpen={isLogModalOpen}
+        onClose={() => {
+          setIsLogModalOpen(false);
+          setSelectedProductForLog(null);
+        }}
+        product={selectedProductForLog}
+        inoutRecords={inOutRecords}
+      />
     </div>
   );
 };
