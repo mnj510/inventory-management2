@@ -131,26 +131,39 @@ const InventoryTab = () => {
 
   // 재고 추가
   const addNewInventoryItem = async () => {
-    if (newItem.name && newItem.barcode) {
-      try {
-        const itemData = {
-          name: newItem.name,
-          quantity: parseInt(newItem.quantity) || 0,
-          barcode: newItem.barcode,
-          grossPackingQuantity: parseInt(newItem.grossPackingQuantity) || 0
-        };
-        
-        const newItemResponse = await inventoryAPI.create(itemData);
-        setInventory([...inventory, newItemResponse]);
-        setNewItem({ name: '', quantity: 0, barcode: '', grossPackingQuantity: 0 });
-        setIsAddingNew(false);
-        alert('새 상품이 추가되었습니다.');
-      } catch (error) {
-        console.error('재고 추가 오류:', error);
-        alert('상품 추가 중 오류가 발생했습니다.');
-      }
-    } else {
-      alert('상품명과 바코드는 필수입니다.');
+    if (!newItem.name.trim()) {
+      alert('상품명을 입력해주세요.');
+      return;
+    }
+    
+    if (!newItem.barcode.trim()) {
+      alert('바코드를 입력해주세요.');
+      return;
+    }
+    
+    // 바코드 중복 확인
+    const existingItem = inventory.find(item => item.barcode === newItem.barcode.trim());
+    if (existingItem) {
+      alert('이미 존재하는 바코드입니다.');
+      return;
+    }
+    
+    try {
+      const itemData = {
+        name: newItem.name.trim(),
+        quantity: parseInt(newItem.quantity) || 0,
+        barcode: newItem.barcode.trim(),
+        grossPackingQuantity: parseInt(newItem.grossPackingQuantity) || 0
+      };
+      
+      const newItemResponse = await inventoryAPI.create(itemData);
+      setInventory([...inventory, newItemResponse]);
+      setNewItem({ name: '', quantity: 0, barcode: '', grossPackingQuantity: 0 });
+      setIsAddingNew(false);
+      alert('새 상품이 성공적으로 추가되었습니다!');
+    } catch (error) {
+      console.error('재고 추가 오류:', error);
+      alert('상품 추가 중 오류가 발생했습니다.');
     }
   };
 
@@ -448,34 +461,48 @@ const InventoryTab = () => {
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
               <h3 className="font-medium mb-4">새 상품 추가</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input
-                  type="text"
-                  placeholder="상품명"
-                  value={newItem.name}
-                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                  className="p-2 border border-gray-300 rounded-lg"
-                />
-                <input
-                  type="number"
-                  placeholder="수량"
-                  value={newItem.quantity}
-                  onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
-                  className="p-2 border border-gray-300 rounded-lg"
-                />
-                <input
-                  type="text"
-                  placeholder="바코드"
-                  value={newItem.barcode}
-                  onChange={(e) => setNewItem({...newItem, barcode: e.target.value})}
-                  className="p-2 border border-gray-300 rounded-lg"
-                />
-                <input
-                  type="number"
-                  placeholder="그로스 포장 수량"
-                  value={newItem.grossPackingQuantity}
-                  onChange={(e) => setNewItem({...newItem, grossPackingQuantity: e.target.value})}
-                  className="p-2 border border-gray-300 rounded-lg"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">상품명</label>
+                  <input
+                    type="text"
+                    placeholder="상품명을 입력하세요"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">재고 수량</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                    value={newItem.quantity}
+                    onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">바코드</label>
+                  <input
+                    type="text"
+                    placeholder="바코드를 입력하세요"
+                    value={newItem.barcode}
+                    onChange={(e) => setNewItem({...newItem, barcode: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">그로스 포장 수량</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                    value={newItem.grossPackingQuantity}
+                    onChange={(e) => setNewItem({...newItem, grossPackingQuantity: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
               </div>
               <div className="flex gap-2 mt-4">
                 <button
