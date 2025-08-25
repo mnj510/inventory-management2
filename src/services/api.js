@@ -1,32 +1,23 @@
-// 개발/프로덕션 환경에 따른 API URL 설정
-const getApiBaseUrl = () => {
-  console.log('현재 호스트명:', window.location.hostname);
-  console.log('현재 프로토콜:', window.location.protocol);
+import supabase, { testSupabaseConnection } from '../lib/supabase';
+
+// API 모드 결정
+const getApiMode = () => {
+  // 사용자가 강제로 로컬스토리지 모드를 선택한 경우
+  const forceLocalStorage = localStorage.getItem('forceLocalStorage') === 'true';
   
-  // 사용자가 선택할 수 있도록 localStorage에서 모드 확인
-  const forceServerMode = localStorage.getItem('forceServerMode') === 'true';
-  
-  if (forceServerMode) {
-    console.log('🔵 강제 서버 API 모드로 실행 (사용자 설정)');
-    return 'http://192.168.219.43:5001/api';
+  if (forceLocalStorage) {
+    console.log('🟢 강제 로컬스토리지 모드로 실행 (사용자 설정)');
+    return 'localStorage';
   }
   
-  // 로컬 개발 환경에서는 서버 API 사용
-  if (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1' ||
-      window.location.hostname.startsWith('192.168.')) {
-    console.log('🔵 서버 API 모드로 실행 (로컬 환경)');
-    return process.env.REACT_APP_API_URL || 'http://192.168.219.43:5001/api';
-  }
-  
-  // Vercel 등 HTTPS 환경에서는 로컬스토리지 사용
-  console.log('🟢 로컬스토리지 모드로 실행 (HTTPS 환경)');
-  return null; // 로컬스토리지 모드
+  // 기본적으로 Supabase 사용
+  console.log('🔵 Supabase 모드로 실행');
+  return 'supabase';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+const API_MODE = getApiMode();
 
-// 로컬스토리지 기반 API (Vercel 프로덕션용)
+// 로컬스토리지 기반 API (백업용)
 const localStorageAPI = {
   // 출퇴근 기록
   attendance: {
@@ -61,7 +52,6 @@ const localStorageAPI = {
     getAll: () => {
       const inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
       if (inventory.length === 0) {
-        // 초기 데이터
         const initialData = [
           { id: 1, name: 'A상품', quantity: 100, barcode: '1234567890', grossPackingQuantity: 20 },
           { id: 2, name: 'B상품', quantity: 50, barcode: '0987654321', grossPackingQuantity: 10 },
@@ -102,7 +92,6 @@ const localStorageAPI = {
     getAll: () => {
       const routines = JSON.parse(localStorage.getItem('routines') || '[]');
       if (routines.length === 0) {
-        // 초기 데이터
         const initialData = [
           { id: 1, task: '작업장 안전 점검', completed: false },
           { id: 2, task: '재고 수량 확인', completed: false },
@@ -137,39 +126,80 @@ const localStorageAPI = {
       localStorage.setItem('routines', JSON.stringify(filtered));
       return { message: '삭제되었습니다.' };
     }
-  },
-  
-  // 기타 기록들
-  inoutRecords: {
-    getAll: () => JSON.parse(localStorage.getItem('inout_records') || '[]'),
-    create: (data) => {
-      const records = JSON.parse(localStorage.getItem('inout_records') || '[]');
-      const newRecord = { ...data, id: Date.now() };
-      records.unshift(newRecord);
-      localStorage.setItem('inout_records', JSON.stringify(records));
-      return newRecord;
+  }
+};
+
+// Supabase API 함수들
+const supabaseAPI = {
+  // 출퇴근 기록
+  attendance: {
+    getAll: async () => {
+      const result = await supabase.from('attendance_records').select('*').order('created_at', { ascending: false }).exec();
+      if (result.error) throw new Error(result.error);
+      return result.data || [];
+    },
+    create: async (data) => {
+      const result = await supabase.from('attendance_records').insert(data).exec();
+      if (result.error) throw new Error(result.error);
+      return result.data[0];
+    },
+    update: async (id, data) => {
+      const result = await supabase.from('attendance_records').eq('id', id).update(data).exec();
+      if (result.error) throw new Error(result.error);
+      return result.data[0];
+    },
+    delete: async (id) => {
+      const result = await supabase.from('attendance_records').eq('id', id).delete().exec();
+      if (result.error) throw new Error(result.error);
+      return { message: '삭제되었습니다.' };
     }
   },
-  
-  packingRecords: {
-    getAll: () => JSON.parse(localStorage.getItem('packing_records') || '[]'),
-    create: (data) => {
-      const records = JSON.parse(localStorage.getItem('packing_records') || '[]');
-      const newRecord = { ...data, id: Date.now() };
-      records.unshift(newRecord);
-      localStorage.setItem('packing_records', JSON.stringify(records));
-      return newRecord;
+
+  // 재고 관리
+  inventory: {
+    getAll: async () => {
+      const result = await supabase.from('inventory').select('*').order('name').exec();
+      if (result.error) throw new Error(result.error);
+      return result.data || [];
+    },
+    create: async (data) => {
+      const result = await supabase.from('inventory').insert(data).exec();
+      if (result.error) throw new Error(result.error);
+      return result.data[0];
+    },
+    update: async (id, data) => {
+      const result = await supabase.from('inventory').eq('id', id).update(data).exec();
+      if (result.error) throw new Error(result.error);
+      return result.data[0];
+    },
+    delete: async (id) => {
+      const result = await supabase.from('inventory').eq('id', id).delete().exec();
+      if (result.error) throw new Error(result.error);
+      return { message: '삭제되었습니다.' };
     }
   },
-  
-  outgoingRecords: {
-    getAll: () => JSON.parse(localStorage.getItem('outgoing_records') || '[]'),
-    create: (data) => {
-      const records = JSON.parse(localStorage.getItem('outgoing_records') || '[]');
-      const newRecord = { ...data, id: Date.now() };
-      records.unshift(newRecord);
-      localStorage.setItem('outgoing_records', JSON.stringify(records));
-      return newRecord;
+
+  // 업무 루틴
+  routines: {
+    getAll: async () => {
+      const result = await supabase.from('routines').select('*').order('created_at').exec();
+      if (result.error) throw new Error(result.error);
+      return result.data || [];
+    },
+    create: async (data) => {
+      const result = await supabase.from('routines').insert(data).exec();
+      if (result.error) throw new Error(result.error);
+      return result.data[0];
+    },
+    update: async (id, data) => {
+      const result = await supabase.from('routines').eq('id', id).update(data).exec();
+      if (result.error) throw new Error(result.error);
+      return result.data[0];
+    },
+    delete: async (id) => {
+      const result = await supabase.from('routines').eq('id', id).delete().exec();
+      if (result.error) throw new Error(result.error);
+      return { message: '삭제되었습니다.' };
     }
   }
 };
@@ -177,15 +207,11 @@ const localStorageAPI = {
 // 출퇴근 기록 API
 export const attendanceAPI = {
   getAll: async () => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.attendance.getAll();
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/attendance`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.attendance.getAll();
     } catch (error) {
       console.error('출퇴근 기록 조회 오류:', error);
       throw error;
@@ -193,21 +219,11 @@ export const attendanceAPI = {
   },
   
   create: async (data) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.attendance.create(data);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/attendance`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.attendance.create(data);
     } catch (error) {
       console.error('출퇴근 기록 생성 오류:', error);
       throw error;
@@ -215,21 +231,11 @@ export const attendanceAPI = {
   },
 
   update: async (id, data) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.attendance.update(id, data);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.attendance.update(id, data);
     } catch (error) {
       console.error('출퇴근 기록 수정 오류:', error);
       throw error;
@@ -237,17 +243,11 @@ export const attendanceAPI = {
   },
 
   delete: async (id) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.attendance.delete(id);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.attendance.delete(id);
     } catch (error) {
       console.error('출퇴근 기록 삭제 오류:', error);
       throw error;
@@ -258,15 +258,11 @@ export const attendanceAPI = {
 // 재고 API
 export const inventoryAPI = {
   getAll: async () => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.inventory.getAll();
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/inventory`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.inventory.getAll();
     } catch (error) {
       console.error('재고 조회 오류:', error);
       throw error;
@@ -274,21 +270,11 @@ export const inventoryAPI = {
   },
   
   create: async (data) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.inventory.create(data);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/inventory`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.inventory.create(data);
     } catch (error) {
       console.error('재고 생성 오류:', error);
       throw error;
@@ -296,21 +282,11 @@ export const inventoryAPI = {
   },
   
   update: async (id, data) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.inventory.update(id, data);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.inventory.update(id, data);
     } catch (error) {
       console.error('재고 수정 오류:', error);
       throw error;
@@ -318,17 +294,11 @@ export const inventoryAPI = {
   },
   
   delete: async (id) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.inventory.delete(id);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/inventory/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.inventory.delete(id);
     } catch (error) {
       console.error('재고 삭제 오류:', error);
       throw error;
@@ -339,15 +309,11 @@ export const inventoryAPI = {
 // 업무 루틴 API
 export const routinesAPI = {
   getAll: async () => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.routines.getAll();
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/routines`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.routines.getAll();
     } catch (error) {
       console.error('업무 루틴 조회 오류:', error);
       throw error;
@@ -355,21 +321,11 @@ export const routinesAPI = {
   },
   
   create: async (data) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.routines.create(data);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/routines`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.routines.create(data);
     } catch (error) {
       console.error('업무 루틴 생성 오류:', error);
       throw error;
@@ -377,21 +333,11 @@ export const routinesAPI = {
   },
   
   update: async (id, data) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.routines.update(id, data);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.routines.update(id, data);
     } catch (error) {
       console.error('업무 루틴 수정 오류:', error);
       throw error;
@@ -399,17 +345,11 @@ export const routinesAPI = {
   },
   
   delete: async (id) => {
-    if (!API_BASE_URL) {
+    if (API_MODE === 'localStorage') {
       return localStorageAPI.routines.delete(id);
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      return await supabaseAPI.routines.delete(id);
     } catch (error) {
       console.error('업무 루틴 삭제 오류:', error);
       throw error;
@@ -417,154 +357,45 @@ export const routinesAPI = {
   }
 };
 
-// 입출고 기록 API
+// 간단한 기록 API들 (현재는 로컬스토리지만 사용)
 export const inoutRecordsAPI = {
-  getAll: async () => {
-    if (!API_BASE_URL) {
-      return localStorageAPI.inoutRecords.getAll();
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/inout-records`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    } catch (error) {
-      console.error('입출고 기록 조회 오류:', error);
-      return []; // 빈 배열 반환
-    }
-  },
-  
+  getAll: async () => JSON.parse(localStorage.getItem('inout_records') || '[]'),
   create: async (data) => {
-    if (!API_BASE_URL) {
-      return localStorageAPI.inoutRecords.create(data);
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/inout-records`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    } catch (error) {
-      console.error('입출고 기록 생성 오류:', error);
-      return localStorageAPI.inoutRecords.create(data);
-    }
+    const records = JSON.parse(localStorage.getItem('inout_records') || '[]');
+    const newRecord = { ...data, id: Date.now() };
+    records.unshift(newRecord);
+    localStorage.setItem('inout_records', JSON.stringify(records));
+    return newRecord;
   }
 };
 
-// 포장 기록 API
 export const packingRecordsAPI = {
-  getAll: async () => {
-    if (!API_BASE_URL) {
-      return localStorageAPI.packingRecords.getAll();
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/packing-records`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    } catch (error) {
-      console.error('포장 기록 조회 오류:', error);
-      return [];
-    }
-  },
-  
+  getAll: async () => JSON.parse(localStorage.getItem('packing_records') || '[]'),
   create: async (data) => {
-    if (!API_BASE_URL) {
-      return localStorageAPI.packingRecords.create(data);
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/packing-records`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    } catch (error) {
-      console.error('포장 기록 생성 오류:', error);
-      return localStorageAPI.packingRecords.create(data);
-    }
+    const records = JSON.parse(localStorage.getItem('packing_records') || '[]');
+    const newRecord = { ...data, id: Date.now() };
+    records.unshift(newRecord);
+    localStorage.setItem('packing_records', JSON.stringify(records));
+    return newRecord;
   }
 };
 
-// 출고 기록 API
 export const outgoingRecordsAPI = {
-  getAll: async () => {
-    if (!API_BASE_URL) {
-      return localStorageAPI.outgoingRecords.getAll();
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/outgoing-records`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    } catch (error) {
-      console.error('출고 기록 조회 오류:', error);
-      return [];
-    }
-  },
-  
+  getAll: async () => JSON.parse(localStorage.getItem('outgoing_records') || '[]'),
   create: async (data) => {
-    if (!API_BASE_URL) {
-      return localStorageAPI.outgoingRecords.create(data);
-    }
-    try {
-      const response = await fetch(`${API_BASE_URL}/outgoing-records`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    } catch (error) {
-      console.error('출고 기록 생성 오류:', error);
-      return localStorageAPI.outgoingRecords.create(data);
-    }
+    const records = JSON.parse(localStorage.getItem('outgoing_records') || '[]');
+    const newRecord = { ...data, id: Date.now() };
+    records.unshift(newRecord);
+    localStorage.setItem('outgoing_records', JSON.stringify(records));
+    return newRecord;
   }
 };
 
 // 초기화 시 실행
-console.log('API 모드:', API_BASE_URL ? '서버 모드' : '로컬스토리지 모드');
-console.log('API Base URL:', API_BASE_URL);
+console.log('API 모드:', API_MODE);
+console.log('Supabase 연결 테스트 시작...');
 
-// API 연결 테스트 함수
-export const testApiConnection = async () => {
-  if (!API_BASE_URL) {
-    console.log('로컬스토리지 모드 - 연결 테스트 불필요');
-    return true;
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/attendance`);
-    if (response.ok) {
-      console.log('✅ 서버 API 연결 성공');
-      return true;
-    } else {
-      console.error('❌ 서버 API 연결 실패:', response.status, response.statusText);
-      return false;
-    }
-  } catch (error) {
-    console.error('❌ 서버 API 연결 오류:', error.message);
-    return false;
-  }
-};
-
-// 앱 시작 시 연결 테스트
-testApiConnection();
+// 앱 시작 시 Supabase 연결 테스트
+if (API_MODE === 'supabase') {
+  testSupabaseConnection();
+}

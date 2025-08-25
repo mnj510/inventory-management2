@@ -6,18 +6,34 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
   const [showSettings, setShowSettings] = useState(false);
   
   useEffect(() => {
+    const forceLocalStorage = localStorage.getItem('forceLocalStorage') === 'true';
     const forceServerMode = localStorage.getItem('forceServerMode') === 'true';
-    setApiMode(forceServerMode ? 'server' : 'auto');
+    
+    if (forceLocalStorage) {
+      setApiMode('localStorage');
+    } else if (forceServerMode) {
+      setApiMode('server');
+    } else {
+      setApiMode('supabase');
+    }
   }, []);
   
   const handleApiModeChange = (mode) => {
     setApiMode(mode);
-    if (mode === 'server') {
-      localStorage.setItem('forceServerMode', 'true');
-    } else {
+    if (mode === 'localStorage') {
+      localStorage.setItem('forceLocalStorage', 'true');
       localStorage.removeItem('forceServerMode');
+    } else if (mode === 'supabase') {
+      localStorage.removeItem('forceLocalStorage');
+      localStorage.removeItem('forceServerMode');
+    } else {
+      localStorage.setItem('forceServerMode', 'true');
+      localStorage.removeItem('forceLocalStorage');
     }
-    alert(`API 모드가 ${mode === 'server' ? '서버' : '자동'}으로 변경되었습니다. 페이지를 새로고침해주세요.`);
+    
+    const modeText = mode === 'localStorage' ? '로컬스토리지' : 
+                     mode === 'supabase' ? 'Supabase' : '서버';
+    alert(`API 모드가 ${modeText}로 변경되었습니다. 페이지를 새로고침해주세요.`);
   };
   const menuItems = [
     {
@@ -101,30 +117,31 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
           <h3 className="text-sm font-semibold text-gray-700 mb-3">API 설정</h3>
           <div className="space-y-2">
             <button
-              onClick={() => handleApiModeChange('auto')}
+              onClick={() => handleApiModeChange('supabase')}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                apiMode === 'auto'
+                apiMode === 'supabase'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <Database className="w-4 h-4" />
-              자동 선택 (권장)
+              Supabase (권장)
             </button>
             <button
-              onClick={() => handleApiModeChange('server')}
+              onClick={() => handleApiModeChange('localStorage')}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                apiMode === 'server'
+                apiMode === 'localStorage'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               <Server className="w-4 h-4" />
-              서버 모드 (강제)
+              로컬스토리지 (백업)
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            서버 모드: 데이터가 서버에 저장됩니다
+            Supabase: 클라우드 데이터베이스 (영구 저장)<br/>
+            로컬스토리지: 브라우저 저장 (임시)
           </p>
         </div>
       )}
@@ -137,7 +154,9 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
               물류 직원 관리 시스템
             </p>
             <p className="text-xs text-gray-400 text-center mt-1">
-              현재: {apiMode === 'server' ? '🔵 서버 모드' : '🟢 자동 모드'}
+              현재: {apiMode === 'supabase' ? '🔵 Supabase' : 
+                     apiMode === 'localStorage' ? '🟢 로컬스토리지' : 
+                     apiMode === 'server' ? '🔴 서버' : '🟡 자동'}
             </p>
           </div>
         </div>
