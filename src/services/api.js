@@ -3,16 +3,25 @@ const getApiBaseUrl = () => {
   console.log('현재 호스트명:', window.location.hostname);
   console.log('현재 프로토콜:', window.location.protocol);
   
-  // HTTPS 환경이거나 Vercel 도메인인 경우 로컬스토리지 사용
-  if (window.location.protocol === 'https:' || 
-      window.location.hostname.includes('vercel.app') ||
-      window.location.hostname === 'fogni-dashboard.vercel.app') {
-    console.log('🟢 로컬스토리지 모드로 실행');
-    return null; // 로컬스토리지 모드
+  // 사용자가 선택할 수 있도록 localStorage에서 모드 확인
+  const forceServerMode = localStorage.getItem('forceServerMode') === 'true';
+  
+  if (forceServerMode) {
+    console.log('🔵 강제 서버 API 모드로 실행 (사용자 설정)');
+    return 'http://192.168.219.43:5001/api';
   }
-  // 로컬 개발 환경에서는 로컬 서버 사용
-  console.log('🔵 서버 API 모드로 실행');
-  return process.env.REACT_APP_API_URL || 'http://192.168.219.43:5001/api';
+  
+  // 로컬 개발 환경에서는 서버 API 사용
+  if (window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.startsWith('192.168.')) {
+    console.log('🔵 서버 API 모드로 실행 (로컬 환경)');
+    return process.env.REACT_APP_API_URL || 'http://192.168.219.43:5001/api';
+  }
+  
+  // Vercel 등 HTTPS 환경에서는 로컬스토리지 사용
+  console.log('🟢 로컬스토리지 모드로 실행 (HTTPS 환경)');
+  return null; // 로컬스토리지 모드
 };
 
 const API_BASE_URL = getApiBaseUrl();
