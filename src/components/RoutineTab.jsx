@@ -50,15 +50,33 @@ const RoutineTab = () => {
 
   // 새 업무 추가
   const addNewTask = async () => {
-    if (newTask.trim()) {
-      try {
-        const newRoutine = await routinesAPI.create({ task: newTask });
-        setRoutines([...routines, newRoutine]);
-        setNewTask('');
-      } catch (error) {
-        console.error('업무 추가 오류:', error);
-        alert('업무 추가 중 오류가 발생했습니다.');
-      }
+    if (!newTask.trim()) {
+      alert('업무 내용을 입력해주세요.');
+      return;
+    }
+
+    // 중복 업무 확인
+    const existingTask = routines.find(routine => 
+      routine.task.toLowerCase().trim() === newTask.toLowerCase().trim()
+    );
+    if (existingTask) {
+      alert('이미 존재하는 업무입니다.');
+      return;
+    }
+
+    try {
+      const taskData = { 
+        task: newTask.trim(),
+        completed: false 
+      };
+      
+      const newRoutine = await routinesAPI.create(taskData);
+      setRoutines([...routines, newRoutine]);
+      setNewTask('');
+      alert('새 업무가 성공적으로 추가되었습니다!');
+    } catch (error) {
+      console.error('업무 추가 오류:', error);
+      alert(`업무 추가 중 오류가 발생했습니다: ${error.message}`);
     }
   };
 

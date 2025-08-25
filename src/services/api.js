@@ -198,36 +198,68 @@ export const outgoingRecordsAPI = {
 // 업무 루틴 API
 export const routinesAPI = {
   getAll: async () => {
-    const response = await fetch(`${API_BASE_URL}/routines`);
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/routines`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('업무 루틴 조회 오류:', error);
+      throw error;
+    }
   },
   
   create: async (data) => {
-    const response = await fetch(`${API_BASE_URL}/routines`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/routines`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('업무 루틴 생성 오류:', error);
+      throw error;
+    }
   },
   
   update: async (id, data) => {
-    const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('업무 루틴 수정 오류:', error);
+      throw error;
+    }
   },
   
   delete: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
-      method: 'DELETE',
-    });
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/routines/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('업무 루틴 삭제 오류:', error);
+      throw error;
+    }
   }
 };
