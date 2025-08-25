@@ -1,4 +1,4 @@
-import supabase, { testSupabaseConnection } from '../lib/supabase';
+import supabase, { testSupabaseConnection, checkTables } from '../lib/supabase';
 
 // API 모드 결정 (기본값: 로컬스토리지)
 const getApiMode = () => {
@@ -489,9 +489,26 @@ export const outgoingRecordsAPI = {
 
 // 초기화 시 실행
 console.log('API 모드:', API_MODE);
-console.log('Supabase 연결 테스트 시작...');
 
-// 앱 시작 시 Supabase 연결 테스트
+// 앱 시작 시 Supabase 연결 및 테이블 확인
 if (API_MODE === 'supabase') {
-  testSupabaseConnection();
+  console.log('🔄 Supabase 모드 - 연결 테스트 시작...');
+  testSupabaseConnection().then(connected => {
+    if (connected) {
+      console.log('🔍 테이블 존재 확인 중...');
+      checkTables();
+    }
+  });
+} else {
+  console.log('🟢 로컬스토리지 모드로 실행 중');
 }
+
+// Supabase 수동 테스트 함수 (콘솔에서 사용 가능)
+window.testSupabase = async () => {
+  console.log('🧪 수동 Supabase 테스트 시작');
+  const connected = await testSupabaseConnection();
+  if (connected) {
+    await checkTables();
+  }
+  return connected;
+};

@@ -1,8 +1,8 @@
 // Supabase 클라이언트 설정
 
-// 환경변수에서 Supabase 설정 가져오기
-const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL || "https://ozfsiifhxxirihhdxlsy.supabase.co";
-const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96ZnNpaWZoeHhpcmloaGR4bHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNDcyNDIsImV4cCI6MjA3MTYyMzI0Mn0.ghKMM_nqGWllWi3miCRM5RfLwEzFucwrfui6A7L31ec";
+// Supabase 설정 (최신 정보)
+const SUPABASE_URL = "https://ozfsiifhxxirihhdxlsy.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96ZnNpaWZoeHhpcmloaGR4bHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNDcyNDIsImV4cCI6MjA3MTYyMzI0Mn0.ghKMM_nqGWllWi3miCRM5RfLwEzFucwrfui6A7L31ec";
 
 // Supabase 클라이언트 클래스
 class SupabaseClient {
@@ -130,20 +130,45 @@ const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // 연결 테스트 함수
 export const testSupabaseConnection = async () => {
   try {
-    console.log('Supabase 연결 테스트 시작...');
-    const result = await supabase.from('attendance_records').select('id').limit(1).exec();
+    console.log('🔄 Supabase 연결 테스트 시작...');
+    console.log('📡 URL:', SUPABASE_URL);
+    console.log('🔑 API Key:', SUPABASE_ANON_KEY.substring(0, 20) + '...');
+    
+    const result = await supabase.from('attendance_records').select('count').limit(1).exec();
     
     if (result.error) {
-      console.error('❌ Supabase 연결 실패:', result.error);
+      console.error('❌ Supabase 테이블 접근 실패:', result.error);
+      console.log('💡 해결 방법: Supabase 대시보드에서 simple-schema.sql을 실행하세요');
       return false;
     } else {
-      console.log('✅ Supabase 연결 성공');
+      console.log('✅ Supabase 연결 및 테이블 접근 성공');
+      console.log('📊 테스트 결과:', result.data);
       return true;
     }
   } catch (error) {
-    console.error('❌ Supabase 연결 오류:', error);
+    console.error('❌ Supabase 연결 오류:', error.message);
+    console.log('🌐 네트워크 또는 CORS 문제일 수 있습니다');
     return false;
   }
+};
+
+// 테이블 존재 확인 함수
+export const checkTables = async () => {
+  const tables = ['attendance_records', 'inventory', 'routines'];
+  const results = {};
+  
+  for (const table of tables) {
+    try {
+      const result = await supabase.from(table).select('count').limit(1).exec();
+      results[table] = !result.error;
+      console.log(`📋 테이블 ${table}: ${!result.error ? '✅ 존재' : '❌ 없음'}`);
+    } catch (error) {
+      results[table] = false;
+      console.log(`📋 테이블 ${table}: ❌ 오류 - ${error.message}`);
+    }
+  }
+  
+  return results;
 };
 
 export default supabase;
