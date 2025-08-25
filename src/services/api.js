@@ -1,18 +1,18 @@
 import supabase, { testSupabaseConnection } from '../lib/supabase';
 
-// API 모드 결정
+// API 모드 결정 (기본값: 로컬스토리지)
 const getApiMode = () => {
-  // 사용자가 강제로 로컬스토리지 모드를 선택한 경우
-  const forceLocalStorage = localStorage.getItem('forceLocalStorage') === 'true';
+  // 사용자가 Supabase 모드를 선택한 경우만 Supabase 사용
+  const forceSupabase = localStorage.getItem('forceSupabase') === 'true';
   
-  if (forceLocalStorage) {
-    console.log('🟢 강제 로컬스토리지 모드로 실행 (사용자 설정)');
-    return 'localStorage';
+  if (forceSupabase) {
+    console.log('🔵 Supabase 모드로 실행 (사용자 설정)');
+    return 'supabase';
   }
   
-  // 기본적으로 Supabase 사용
-  console.log('🔵 Supabase 모드로 실행');
-  return 'supabase';
+  // 기본적으로 로컬스토리지 사용 (안정성)
+  console.log('🟢 로컬스토리지 모드로 실행 (기본값)');
+  return 'localStorage';
 };
 
 const API_MODE = getApiMode();
@@ -134,72 +134,168 @@ const supabaseAPI = {
   // 출퇴근 기록
   attendance: {
     getAll: async () => {
-      const result = await supabase.from('attendance_records').select('*').order('created_at', { ascending: false }).exec();
-      if (result.error) throw new Error(result.error);
-      return result.data || [];
+      try {
+        const result = await supabase.from('attendance_records').select('*').order('created_at', { ascending: false }).exec();
+        if (result.error) {
+          console.warn('Supabase 출퇴근 기록 조회 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.attendance.getAll();
+        }
+        return result.data || [];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.attendance.getAll();
+      }
     },
     create: async (data) => {
-      const result = await supabase.from('attendance_records').insert(data).exec();
-      if (result.error) throw new Error(result.error);
-      return result.data[0];
+      try {
+        const result = await supabase.from('attendance_records').insert(data).exec();
+        if (result.error) {
+          console.warn('Supabase 출퇴근 기록 생성 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.attendance.create(data);
+        }
+        return result.data[0];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.attendance.create(data);
+      }
     },
     update: async (id, data) => {
-      const result = await supabase.from('attendance_records').eq('id', id).update(data).exec();
-      if (result.error) throw new Error(result.error);
-      return result.data[0];
+      try {
+        const result = await supabase.from('attendance_records').eq('id', id).update(data).exec();
+        if (result.error) {
+          console.warn('Supabase 출퇴근 기록 수정 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.attendance.update(id, data);
+        }
+        return result.data[0];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.attendance.update(id, data);
+      }
     },
     delete: async (id) => {
-      const result = await supabase.from('attendance_records').eq('id', id).delete().exec();
-      if (result.error) throw new Error(result.error);
-      return { message: '삭제되었습니다.' };
+      try {
+        const result = await supabase.from('attendance_records').eq('id', id).delete().exec();
+        if (result.error) {
+          console.warn('Supabase 출퇴근 기록 삭제 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.attendance.delete(id);
+        }
+        return { message: '삭제되었습니다.' };
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.attendance.delete(id);
+      }
     }
   },
 
   // 재고 관리
   inventory: {
     getAll: async () => {
-      const result = await supabase.from('inventory').select('*').order('name').exec();
-      if (result.error) throw new Error(result.error);
-      return result.data || [];
+      try {
+        const result = await supabase.from('inventory').select('*').order('name').exec();
+        if (result.error) {
+          console.warn('Supabase 재고 조회 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.inventory.getAll();
+        }
+        return result.data || [];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.inventory.getAll();
+      }
     },
     create: async (data) => {
-      const result = await supabase.from('inventory').insert(data).exec();
-      if (result.error) throw new Error(result.error);
-      return result.data[0];
+      try {
+        const result = await supabase.from('inventory').insert(data).exec();
+        if (result.error) {
+          console.warn('Supabase 재고 생성 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.inventory.create(data);
+        }
+        return result.data[0];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.inventory.create(data);
+      }
     },
     update: async (id, data) => {
-      const result = await supabase.from('inventory').eq('id', id).update(data).exec();
-      if (result.error) throw new Error(result.error);
-      return result.data[0];
+      try {
+        const result = await supabase.from('inventory').eq('id', id).update(data).exec();
+        if (result.error) {
+          console.warn('Supabase 재고 수정 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.inventory.update(id, data);
+        }
+        return result.data[0];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.inventory.update(id, data);
+      }
     },
     delete: async (id) => {
-      const result = await supabase.from('inventory').eq('id', id).delete().exec();
-      if (result.error) throw new Error(result.error);
-      return { message: '삭제되었습니다.' };
+      try {
+        const result = await supabase.from('inventory').eq('id', id).delete().exec();
+        if (result.error) {
+          console.warn('Supabase 재고 삭제 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.inventory.delete(id);
+        }
+        return { message: '삭제되었습니다.' };
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.inventory.delete(id);
+      }
     }
   },
 
   // 업무 루틴
   routines: {
     getAll: async () => {
-      const result = await supabase.from('routines').select('*').order('created_at').exec();
-      if (result.error) throw new Error(result.error);
-      return result.data || [];
+      try {
+        const result = await supabase.from('routines').select('*').order('created_at').exec();
+        if (result.error) {
+          console.warn('Supabase 업무 루틴 조회 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.routines.getAll();
+        }
+        return result.data || [];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.routines.getAll();
+      }
     },
     create: async (data) => {
-      const result = await supabase.from('routines').insert(data).exec();
-      if (result.error) throw new Error(result.error);
-      return result.data[0];
+      try {
+        const result = await supabase.from('routines').insert(data).exec();
+        if (result.error) {
+          console.warn('Supabase 업무 루틴 생성 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.routines.create(data);
+        }
+        return result.data[0];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.routines.create(data);
+      }
     },
     update: async (id, data) => {
-      const result = await supabase.from('routines').eq('id', id).update(data).exec();
-      if (result.error) throw new Error(result.error);
-      return result.data[0];
+      try {
+        const result = await supabase.from('routines').eq('id', id).update(data).exec();
+        if (result.error) {
+          console.warn('Supabase 업무 루틴 수정 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.routines.update(id, data);
+        }
+        return result.data[0];
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.routines.update(id, data);
+      }
     },
     delete: async (id) => {
-      const result = await supabase.from('routines').eq('id', id).delete().exec();
-      if (result.error) throw new Error(result.error);
-      return { message: '삭제되었습니다.' };
+      try {
+        const result = await supabase.from('routines').eq('id', id).delete().exec();
+        if (result.error) {
+          console.warn('Supabase 업무 루틴 삭제 실패, 로컬스토리지로 전환:', result.error);
+          return localStorageAPI.routines.delete(id);
+        }
+        return { message: '삭제되었습니다.' };
+      } catch (error) {
+        console.warn('Supabase 연결 실패, 로컬스토리지로 전환:', error);
+        return localStorageAPI.routines.delete(id);
+      }
     }
   }
 };

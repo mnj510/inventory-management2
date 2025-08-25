@@ -6,33 +6,24 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
   const [showSettings, setShowSettings] = useState(false);
   
   useEffect(() => {
-    const forceLocalStorage = localStorage.getItem('forceLocalStorage') === 'true';
-    const forceServerMode = localStorage.getItem('forceServerMode') === 'true';
+    const forceSupabase = localStorage.getItem('forceSupabase') === 'true';
     
-    if (forceLocalStorage) {
-      setApiMode('localStorage');
-    } else if (forceServerMode) {
-      setApiMode('server');
-    } else {
+    if (forceSupabase) {
       setApiMode('supabase');
+    } else {
+      setApiMode('localStorage');
     }
   }, []);
   
   const handleApiModeChange = (mode) => {
     setApiMode(mode);
-    if (mode === 'localStorage') {
-      localStorage.setItem('forceLocalStorage', 'true');
-      localStorage.removeItem('forceServerMode');
-    } else if (mode === 'supabase') {
-      localStorage.removeItem('forceLocalStorage');
-      localStorage.removeItem('forceServerMode');
+    if (mode === 'supabase') {
+      localStorage.setItem('forceSupabase', 'true');
     } else {
-      localStorage.setItem('forceServerMode', 'true');
-      localStorage.removeItem('forceLocalStorage');
+      localStorage.removeItem('forceSupabase');
     }
     
-    const modeText = mode === 'localStorage' ? '로컬스토리지' : 
-                     mode === 'supabase' ? 'Supabase' : '서버';
+    const modeText = mode === 'supabase' ? 'Supabase' : '로컬스토리지';
     alert(`API 모드가 ${modeText}로 변경되었습니다. 페이지를 새로고침해주세요.`);
   };
   const menuItems = [
@@ -117,17 +108,6 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
           <h3 className="text-sm font-semibold text-gray-700 mb-3">API 설정</h3>
           <div className="space-y-2">
             <button
-              onClick={() => handleApiModeChange('supabase')}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                apiMode === 'supabase'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Database className="w-4 h-4" />
-              Supabase (권장)
-            </button>
-            <button
               onClick={() => handleApiModeChange('localStorage')}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                 apiMode === 'localStorage'
@@ -136,12 +116,23 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
               }`}
             >
               <Server className="w-4 h-4" />
-              로컬스토리지 (백업)
+              로컬스토리지 (기본값)
+            </button>
+            <button
+              onClick={() => handleApiModeChange('supabase')}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                apiMode === 'supabase'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Database className="w-4 h-4" />
+              Supabase (클라우드)
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Supabase: 클라우드 데이터베이스 (영구 저장)<br/>
-            로컬스토리지: 브라우저 저장 (임시)
+            로컬스토리지: 브라우저 저장 (안정적)<br/>
+            Supabase: 클라우드 데이터베이스 (실험적)
           </p>
         </div>
       )}
@@ -154,9 +145,7 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
               물류 직원 관리 시스템
             </p>
             <p className="text-xs text-gray-400 text-center mt-1">
-              현재: {apiMode === 'supabase' ? '🔵 Supabase' : 
-                     apiMode === 'localStorage' ? '🟢 로컬스토리지' : 
-                     apiMode === 'server' ? '🔴 서버' : '🟡 자동'}
+              현재: {apiMode === 'supabase' ? '🔵 Supabase' : '🟢 로컬스토리지'}
             </p>
           </div>
         </div>
