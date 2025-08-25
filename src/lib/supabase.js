@@ -20,7 +20,7 @@ class SupabaseClient {
   async request(endpoint, options = {}) {
     const url = `${this.url}/rest/v1/${endpoint}`;
     try {
-      console.log(`Supabase 요청: ${options.method || 'GET'} ${url}`);
+      console.log(`📡 Supabase 요청: ${options.method || 'GET'} ${url}`);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -30,16 +30,26 @@ class SupabaseClient {
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Supabase 오류: ${response.status} ${errorText}`);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        console.error(`❌ Supabase HTTP 오류 ${response.status}:`, errorText);
+        
+        // 일반적인 오류 해석
+        if (response.status === 404) {
+          return { data: null, error: '테이블을 찾을 수 없습니다. Supabase에서 테이블을 생성해주세요.' };
+        } else if (response.status === 401) {
+          return { data: null, error: 'API 키가 올바르지 않습니다.' };
+        } else if (response.status === 403) {
+          return { data: null, error: '접근 권한이 없습니다. RLS 정책을 확인해주세요.' };
+        }
+        
+        return { data: null, error: `HTTP ${response.status}: ${errorText}` };
       }
       
       const data = await response.json();
-      console.log('Supabase 응답:', data);
+      console.log('✅ Supabase 응답 성공:', data);
       return { data, error: null };
     } catch (error) {
-      console.error('Supabase 요청 오류:', error);
-      return { data: null, error: error.message };
+      console.error('🌐 Supabase 네트워크 오류:', error);
+      return { data: null, error: `네트워크 오류: ${error.message}` };
     }
   }
 
