@@ -164,6 +164,7 @@ const AttendanceTab = () => {
   // 출퇴근 기록 추가
   const addAttendanceRecord = async () => {
     try {
+      console.log('출퇴근 기록 추가 시작');
       const now = new Date();
       const recordData = {
         type: selectedType,
@@ -171,12 +172,15 @@ const AttendanceTab = () => {
         date: now.toLocaleDateString('ko-KR')
       };
       
+      console.log('전송할 데이터:', recordData);
       const newRecord = await attendanceAPI.create(recordData);
+      console.log('생성된 기록:', newRecord);
+      
       setAttendanceRecords([newRecord, ...attendanceRecords]);
       alert(`${selectedType} 시간이 기록되었습니다: ${recordData.time}`);
     } catch (error) {
       console.error('출퇴근 기록 추가 오류:', error);
-      alert('기록 추가 중 오류가 발생했습니다.');
+      alert(`기록 추가 중 오류가 발생했습니다: ${error.message}`);
     }
   };
 

@@ -152,6 +152,7 @@ const InventoryTab = () => {
     }
     
     try {
+      console.log('재고 추가 시작');
       const itemData = {
         name: newItem.name.trim(),
         quantity: parseInt(newItem.quantity) || 0,
@@ -159,14 +160,17 @@ const InventoryTab = () => {
         grossPackingQuantity: parseInt(newItem.grossPackingQuantity) || 0
       };
       
+      console.log('전송할 상품 데이터:', itemData);
       const newItemResponse = await inventoryAPI.create(itemData);
+      console.log('생성된 상품:', newItemResponse);
+      
       setInventory([...inventory, newItemResponse]);
       setNewItem({ name: '', quantity: 0, barcode: '', grossPackingQuantity: 0 });
       setIsAddingNew(false);
       alert('새 상품이 성공적으로 추가되었습니다!');
     } catch (error) {
       console.error('재고 추가 오류:', error);
-      alert('상품 추가 중 오류가 발생했습니다.');
+      alert(`상품 추가 중 오류가 발생했습니다: ${error.message}`);
     }
   };
 

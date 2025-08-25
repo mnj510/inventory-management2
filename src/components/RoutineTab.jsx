@@ -65,12 +65,16 @@ const RoutineTab = () => {
     }
 
     try {
+      console.log('업무 추가 시작');
       const taskData = { 
         task: newTask.trim(),
         completed: false 
       };
       
+      console.log('전송할 업무 데이터:', taskData);
       const newRoutine = await routinesAPI.create(taskData);
+      console.log('생성된 업무:', newRoutine);
+      
       setRoutines([...routines, newRoutine]);
       setNewTask('');
       alert('새 업무가 성공적으로 추가되었습니다!');

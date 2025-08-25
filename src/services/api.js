@@ -542,3 +542,29 @@ export const outgoingRecordsAPI = {
 
 // 초기화 시 실행
 console.log('API 모드:', API_BASE_URL ? '서버 모드' : '로컬스토리지 모드');
+console.log('API Base URL:', API_BASE_URL);
+
+// API 연결 테스트 함수
+export const testApiConnection = async () => {
+  if (!API_BASE_URL) {
+    console.log('로컬스토리지 모드 - 연결 테스트 불필요');
+    return true;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/attendance`);
+    if (response.ok) {
+      console.log('✅ 서버 API 연결 성공');
+      return true;
+    } else {
+      console.error('❌ 서버 API 연결 실패:', response.status, response.statusText);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ 서버 API 연결 오류:', error.message);
+    return false;
+  }
+};
+
+// 앱 시작 시 연결 테스트
+testApiConnection();
