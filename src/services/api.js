@@ -1,10 +1,17 @@
 // 개발/프로덕션 환경에 따른 API URL 설정
 const getApiBaseUrl = () => {
-  // Vercel 프로덕션 환경에서는 로컬스토리지 사용
-  if (window.location.hostname === 'fogni-dashboard.vercel.app') {
+  console.log('현재 호스트명:', window.location.hostname);
+  console.log('현재 프로토콜:', window.location.protocol);
+  
+  // HTTPS 환경이거나 Vercel 도메인인 경우 로컬스토리지 사용
+  if (window.location.protocol === 'https:' || 
+      window.location.hostname.includes('vercel.app') ||
+      window.location.hostname === 'fogni-dashboard.vercel.app') {
+    console.log('🟢 로컬스토리지 모드로 실행');
     return null; // 로컬스토리지 모드
   }
   // 로컬 개발 환경에서는 로컬 서버 사용
+  console.log('🔵 서버 API 모드로 실행');
   return process.env.REACT_APP_API_URL || 'http://192.168.219.43:5001/api';
 };
 
